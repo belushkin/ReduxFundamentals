@@ -1,50 +1,58 @@
-export const StatusFilters = {
-  All: 'all',
-  Active: 'active',
-  Completed: 'completed',
+const initialState = []
+
+function nextTodoId(todos) {
+  const maxId = todos.reduce((maxId, todo) => Math.max(todo.id, maxId), -1)
+  return maxId + 1
 }
 
-const initialState = {
-  status: StatusFilters.All,
-  colors: [],
-}
-
-export default function filtersReducer(state = initialState, action) {
+export default function todosReducer(state = initialState, action) {
   switch (action.type) {
-    case 'filters/statusFilterChanged': {
-      return {
-        // Again, one less level of nesting to copy
+    case 'todos/todoAdded': {
+      // Can return just the new todos array - no extra object around it
+      return [
         ...state,
-        status: action.payload,
-      }
+        {
+          id: nextTodoId(state),
+          text: action.payload,
+          completed: false,
+        },
+      ]
     }
-    case 'filters/colorFilterChanged': {
-      let { color, changeType } = action.payload
-      const { colors } = state
-
-      switch (changeType) {
-        case 'added': {
-          if (colors.includes(color)) {
-            // This color already is set as a filter. Don't change the state.
-            return state
-          }
-
-          return {
-            ...state,
-            colors: state.colors.concat(color),
-          }
+    case 'todos/todoToggled': {
+      return state.map((todo) => {
+        if (todo.id !== action.payload) {
+          return todo
         }
-        case 'removed': {
-          return {
-            ...state,
-            colors: state.colors.filter(
-              (existingColor) => existingColor !== color
-            ),
-          }
+
+        return {
+          ...todo,
+          completed: !todo.completed,
         }
-        default:
-          return state
-      }
+      })
+    }
+    case 'todos/colorSelected': {
+      const { color, todoId } = action.payload
+      return state.map((todo) => {
+        if (todo.id !== todoId) {
+          return todo
+        }
+
+        return {
+          ...todo,
+          color,
+        }
+      })
+    }
+    case 'todos/todoDeleted': {
+      return state.filter((todo) => todo.id !== action.payload)
+    }
+    case 'todos/allCompleted': {
+      return state.map((todo) => {
+        return { ...todo, completed: true }
+      })
+    }
+    case 'todos/completedCleared': {
+      return state.filter((todo) => !todo.completed)
     }
     default:
       return state
