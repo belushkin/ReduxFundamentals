@@ -1,28 +1,14 @@
-import { createStore, compose, applyMiddleware } from 'redux'
-import thunkMiddleware from 'redux-thunk'
-import { composeWithDevTools } from 'redux-devtools-extension'
-import rootReducer from './reducer'
-import {
-  sayHiOnDispatch,
-  includeMeaningOfLife
-} from './exampleAddons/enhancers'
-import { 
-  print1, 
-  print2, 
-  print3 
-} from './exampleAddons/middleware'
+import { configureStore } from '@reduxjs/toolkit'
 
-// const middlewareEnhancer = applyMiddleware(print1, print2, print3)
-// const composedEnhancer = compose(sayHiOnDispatch, includeMeaningOfLife, middlewareEnhancer)
+import todosReducer from './features/todos/todosSlice'
+import filtersReducer from './features/filters/filtersSlice'
 
-// const composedEnhancer = composeWithDevTools(
-//   // EXAMPLE: Add whatever middleware you actually want to use here
-//   applyMiddleware(print1, print2, print3)
-//   // other store enhancers if any
-// )
-
-const composedEnhancer = composeWithDevTools(applyMiddleware(thunkMiddleware))
-
-const store = createStore(rootReducer, composedEnhancer)
+const store = configureStore({
+  reducer: {
+    // Define a top-level state field named `todos`, handled by `todosReducer`
+    todos: todosReducer,
+    filters: filtersReducer
+  }
+})
 
 export default store
